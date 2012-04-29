@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<style type="text/css">
+	div.container{width:800px;}
+	div.c_left{float:left; width:50%;}
+	div.c_right{float:left; width:50%;}
+</style>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Color</title>
+</head>
+
+<body style="text-align:center;">
+<div id="container" >
+</div>
+<div id="messagecon">
+<input type="text" id="showMessage" />
+</div>
+<img id="backimg" src="ffwing.jpg" style="display:none" />
+<img id="billd" src="billd.png" style="display:none" />
+<img id="test" src="test2.png" style="display:none" />
+<img id="buttle" src="fireball.png" style="display:none" />
+<img id="worldmap" src="world.png" style="display:none" />
+
+<script type="text/javascript" src="jquery-1.7.1.js"></script>
+<script type="text/javascript" src="quark.base-1.0.0.js"></script>
+<script type="text/javascript" src="QuarkUtils.js"></script>
+<script type="text/javascript" src="./src/npc/npcbase.js"></script>
+<script type="text/javascript" src="./src/npc/player.js"></script>
+<script type="text/javascript" src="./src/npc/weapon.js"></script>
+<script type="text/javascript" src="./src/npc/wsnpc.js"></script>
+<script type="text/javascript" src="./src/control/controlbase.js"></script>
+<script type="text/javascript" src="./src/control/controlsystem.js"></script>
+<script type="text/javascript" src="./src/control/controlplayer.js"></script>
+<script type="text/javascript" src="./src/message/message.js"></script>
+
+<script>
+//$(document).ready(function() {
+	//create a DOMContext
+	var canvasId = 'canvas';
+	var container = Quark.getDOM("container");
+	//var domContext = new Quark.DOMContext({canvas:container});
+	var canvas = Quark.createDOM("canvas", {id:canvasId, width:950, height:600, style:
+	{
+		//position:"absolute",
+		backgroundColor:"#ffff11"
+	}});
+	container.appendChild(canvas);
+	var canvasContext = new Quark.CanvasContext({canvas:canvas});
+	
+	var stage = new Quark.Stage({width:950, height:600, context:canvasContext, update:function()
+	{
+		//write your own update code here
+	}});
+	
+	var isDrug = false;
+	var moveVDir = 5;
+	var moveHDir = 5;
+	
+	var bmp = new Quark.Bitmap({image:Q.getDOM("test"), rect:[0,0,300,400], x:100, y:0, regX:0, regY:0, update:function()
+	{
+		//update code here
+	}});
+	
+	var buttleArray = new Array();
+	//var buttle = new Quark.Bitmap({image:Q.getDOM("buttle"), rect:[0,0,40,40], x:0, y:0, regX:20, regY:20, update:function()
+	//{
+	//}});
+	
+	var moveSpeed = 2;
+	
+	var worldMap = new Quark.Bitmap({image:Q.getDOM("worldmap"), rect:[0,0,2000,2000], x:-300, y:-300, regX:0, regY:0, update:function()
+	{
+		//update code here
+		switch(moveVDir){
+			case 8:
+				this.y += moveSpeed;
+				break;
+			case 2:
+				this.y -= moveSpeed;
+				break;
+			default:
+				break;
+		}
+		switch(moveHDir){
+			case 4:
+				this.x += moveSpeed;
+				break;
+			case 6:
+				this.x -= moveSpeed;
+				break;
+			default:
+				break;
+		}
+	}});
+	
+	var bmp2 = new Quark.Bitmap({image:Q.getDOM("billd"), rect:[0,0,60,60], x:475, y:300, regX:30, regY:30, update:function()
+	{
+		/*
+		if(this.x > 1){
+			this.x -= 2;
+		}
+		else
+			this.x = 600;
+		*/
+
+		if(isDrug){
+			//bmp2.x = e.eventX - diffX;
+			//bmp2.y = e.eventY - diffY;
+			this.x = mouseX - diffX;
+			this.y = mouseY - diffY;
+		}
+		
+		if(QuarkUtils.hitTest(bmp, bmp2, canvasId)){
+			this.alpha = 0.5;
+		}
+		else
+			this.alpha = 1;
+		
+		//this.x = 110;
+		//this.y = 110;
+		//update code here
+	}});
+	
+	stage.addChild(worldMap);
+	stage.addChild(bmp);
+	stage.addChild(bmp2);
+	
+	var diffX, diffY, mouseX, mouseY;
+	
+	bmp2.onmousedown = function(e)
+	//function onMouseDown(e)
+	{
+		//console.log(e);
+		//bmp2.x = bmp2.localToGlobal(e.eventX, e.eventY).x;
+		//bmp2.y = bmp2.localToGlobal(e.eventX, e.eventY).y;
+		//bmp2.x = e.eventX;
+		//bmp2.y = e.eventY;
+		diffX = e.eventX - bmp2.x;
+		diffY = e.eventY - bmp2.y;
+		isDrug = true;
+		em.registerStage(stage, moveevent);
+	//	$("#showMessage").val("start");
+	}
+	
+	bmp2.onmouseup = function(e)
+	{
+		diffX = diffY = 0;
+		isDrug = false;
+		em.unregisterStage(stage, moveevent);
+	//	$("#showMessage").val("end");
+	}
+	
+	stage.onmousemove = function(e)
+	{
+		//bmp2.x = e.eventX - diffX;
+		//bmp2.y = e.eventY - diffY;
+		mouseX = e.eventX;
+		mouseY = e.eventY;
+	//	$("#showMessage").val(e.eventX);
+	}
+	
+	stage.onmouseup = function(e){
+		fire(e.eventX, e.eventY);
+	}
+	
+	var fireSpeed = 5;
+	function fire(_x, _y){
+		var init = false;
+		var moveX, moveY;
+		var _angel = Math.atan2( Math.abs(bmp2.y - _y), Math.abs(bmp2.x - _x) );
+		var buttle = new Quark.Bitmap({image:Q.getDOM("buttle"), rect:[0,0,40,40], x:bmp2.x, y:bmp2.y, regX:20, regY:20, update:function()
+		{
+			if(!init){
+				if(bmp2.x >= _x){
+					moveX = -Math.cos(_angel) * fireSpeed;
+				}
+				else{
+					moveX = Math.cos(_angel) * fireSpeed;
+				}
+				
+				if(bmp2.y >= _y){
+					moveY = -Math.sin(_angel) * fireSpeed;
+				}
+				else{
+					moveY = Math.sin(_angel) * fireSpeed;
+				}
+				init = true;
+			}
+			
+			switch(moveVDir){
+				case 8:
+					//if(moveY >= 0)
+					//	this.y = this.y + moveY + moveSpeed;
+					//else
+					this.y = this.y + moveY + moveSpeed;
+					break;
+				case 2:
+					//if(moveY >= 0)
+					//	this.y = this.y + moveY - moveSpeed;
+					//else
+					this.y = this.y + moveY - moveSpeed;
+					break;
+				default:
+					this.y += moveY;
+					break;
+			}
+			switch(moveHDir){
+				case 4:
+					//if(moveX >= 0)
+					//	this.x = this.x + moveX + moveSpeed;
+					//else
+					this.x = this.x + moveX + moveSpeed;
+					break;
+				case 6:
+					//if(moveX >= 0)
+					//	this.x = this.x + moveX - moveSpeed;
+					//else
+					this.x = this.x + moveX - moveSpeed;
+					break;
+				default:
+					this.x += moveX;
+					break;
+			}
+			
+			//this.x += moveX;
+			//this.y += moveY;
+			
+			if(this.hitTestObject(bmp))
+				stage.removeChild(this);
+			
+			//if(QuarkUtils.hitTest(bmp,this,"canvas"))
+			//	stage.removeChild(this);
+			
+			if(this.x <= 0 || this.y <= 0 || this.x >= stage.width || this.y >= stage.height)
+				stage.removeChild(this);
+		}});
+		buttleArray.push(buttle);
+		$("#showMessage").val(buttleArray.length);
+		stage.addChild(buttle);
+		//buttle.x = _x;
+		//buttle.y = _y;
+	}
+	
+	document.onkeydown = function(e){
+		$("#showMessage").val(e.which);
+		if(moveVDir == 5){
+			switch(e.which){
+				case 87:
+					moveVDir = 8;
+					break;
+				case 83:
+					moveVDir = 2;
+					break;
+				default:
+					moveVDir = 5;
+					break;
+			}	
+		}
+		
+		if(moveHDir == 5){
+			switch(e.which){
+				case 65:
+					moveHDir = 4;
+					break;
+				case 68:
+					moveHDir = 6;
+					break;
+				default:
+					moveHDir = 5;
+					break;
+			}	
+		}
+	}
+	document.onkeyup = function(e){
+		//moveDir = 5;
+		if(moveVDir != 5){
+			if(e.which == 87 || e.which == 83)
+				moveVDir = 5;
+		}
+		if(moveHDir != 5){
+			if(e.which == 65 || e.which == 68)
+				moveHDir = 5;
+		}
+	}
+	
+	var events;
+	//events = Quark.supportTouch ? ["touchend"] : ["mousedown"];
+	events = ["mousedown", "mouseup"];
+	keyevents = ["keypress", "keyup", "keydown"];
+	moveevent = ["mousemove"];
+	var em = new Q.EventManager();
+	em.registerStage(stage, events);
+	//em.registerStage(stage, keyevents);
+	//em.registerStage(stage, moveevent);
+	//em.register(bmp2, events, onMouseDown);
+	
+	//bmp2.addEventListener("mousedown", onMouseDown);
+	
+	var fps = 30;
+	var timer = new Q.Timer(1000/fps);
+	timer.addListener(stage);
+	timer.start();
+	
+	//alert(bmp.hitTest(bmp2, canvasId));
+	//console.log(bmp.hitTest(bmp, canvasId));
+	
+	var playertest = new Player("fuck", 0, 0, 100, 100, 0, 0);
+	console.log(playertest.isControlable);
+	
+	var cs = new ControlSystem(stage);
+	cs.bindNpc("sg", 1);
+	console.log(cs.getNpc("sg"));
+//});
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<style type="text/css">
+	div.container{width:800px;}
+	div.c_left{float:left; width:50%;}
+	div.c_right{float:left; width:50%;}
+</style>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Color</title>
+</head>
+
+<body style="text-align:center;">
+<div id="container" >
+</div>
+<div id="messagecon">
+<input type="text" id="showMessage" />
+</div>
+<img id="backimg" src="ffwing.jpg" style="display:none" />
+<img id="billd" src="billd.png" style="display:none" />
+<img id="test" src="test2.png" style="display:none" />
+<img id="buttle" src="fireball.png" style="display:none" />
+<img id="buttle2" src="fireball2.png" style="display:none" />
+<img id="worldmap" src="world.png" style="display:none" />
+<img id="uiskbar" src="ui_skillbar.png" style="display:none" />
+<img id="uisk0" src="ui_s0.png" style="display:none" />
+<img id="uisk1" src="ui_s1.png" style="display:none" />
+<img id="uisk2" src="ui_s2.png" style="display:none" />
+<img id="uisk3" src="ui_s3.png" style="display:none" />
+<img id="tt" src="t.png" style="display:none" />
+
+<script type="text/javascript" src="jquery-1.7.1.js"></script>
+<script type="text/javascript" src="quark.base-1.0.0.js"></script>
+<script type="text/javascript" src="QuarkUtils.js"></script>
+<script type="text/javascript" src="./src/control/controlconst.js"></script>
+<script type="text/javascript" src="./src/npc/npcbase.js"></script>
+<script type="text/javascript" src="./src/npc/player.js"></script>
+<script type="text/javascript" src="./src/npc/weapon.js"></script>
+<script type="text/javascript" src="./src/npc/wsnpc.js"></script>
+<script type="text/javascript" src="./src/scene/scene.js"></script>
+<script type="text/javascript" src="./src/control/controlbase.js"></script>
+<script type="text/javascript" src="./src/control/controlsystem.js"></script>
+<script type="text/javascript" src="./src/ui/ui.js"></script>
+<script type="text/javascript" src="./src/main/main.js"></script>
+<script type="text/javascript" src="./src/control/controlplayer.js"></script>
+<script type="text/javascript" src="./src/message/message.js"></script>
+
+<script>
+/*
+//$(document).ready(function() {
+	//create a DOMContext
+	var canvasId = 'canvas';
+	var container = Quark.getDOM("container");
+	var canvas = Quark.createDOM("canvas", {id:canvasId, width:950, height:600, style:
+	{
+		//position:"absolute",
+		backgroundColor:"#ffff11"
+	}});
+	container.appendChild(canvas);
+	var canvasContext = new Quark.CanvasContext({canvas:canvas});
+	
+	var stage = new Quark.Stage({width:950, height:600, context:canvasContext, update:function()
+	{
+		//write your own update code here
+	}});
+	
+	var moveVDir = 5;
+	var moveHDir = 5;
+	
+	var bmp = new Quark.Bitmap({image:Q.getDOM("test"), rect:[0,0,300,400], x:100, y:0, regX:0, regY:0, update:function()
+	{
+		//update code here
+	}});
+	
+	var buttleArray = new Array();
+	//var buttle = new Quark.Bitmap({image:Q.getDOM("buttle"), rect:[0,0,40,40], x:0, y:0, regX:20, regY:20, update:function()
+	//{
+	//}});
+	
+	var worldMap = new Quark.Bitmap({image:Q.getDOM("worldmap"), rect:[0,0,2000,2000], x:-300, y:-300, regX:0, regY:0, update:function()
+	{
+		//update code here
+		switch(moveVDir){
+			case 8:
+				this.y += ControlConst.PlayerMoveSpeed;
+				break;
+			case 2:
+				this.y -= ControlConst.PlayerMoveSpeed;
+				break;
+			default:
+				break;
+		}
+		switch(moveHDir){
+			case 4:
+				this.x += ControlConst.PlayerMoveSpeed;
+				break;
+			case 6:
+				this.x -= ControlConst.PlayerMoveSpeed;
+				break;
+			default:
+				break;
+		}
+	}});
+	
+	var bmp2 = new Quark.Bitmap({image:Q.getDOM("billd"), rect:[0,0,60,60], x:475, y:300, regX:30, regY:30, update:function()
+	{
+		if(isDrug){
+			this.x = mouseX - diffX;
+			this.y = mouseY - diffY;
+		}
+		
+		if(QuarkUtils.hitTest(bmp, bmp2, canvasId)){
+			this.alpha = 0.5;
+		}
+		else
+			this.alpha = 1;
+	}});
+	
+	stage.addChild(worldMap);
+	stage.addChild(bmp);
+	stage.addChild(bmp2);
+	
+	var diffX, diffY, mouseX, mouseY;
+	
+	var isDrug = false;
+	bmp2.onmousedown = function(e)
+	{
+		diffX = e.eventX - bmp2.x;
+		diffY = e.eventY - bmp2.y;
+		isDrug = true;
+		em.registerStage(stage, moveevent);
+	}
+	
+	bmp2.onmouseup = function(e)
+	{
+		diffX = diffY = 0;
+		isDrug = false;
+		em.unregisterStage(stage, moveevent);
+	}
+	
+	var events;
+	//events = Quark.supportTouch ? ["touchend"] : ["mousedown"];
+	events = ["mousedown", "mouseup"];
+	keyevents = ["keypress", "keyup", "keydown"];
+	moveevent = ["mousemove"];
+	var em = new Q.EventManager();
+	em.registerStage(stage, events);
+	//em.registerStage(stage, keyevents);
+	//em.registerStage(stage, moveevent);
+	//em.register(bmp2, events, onMouseDown);
+	
+	//bmp2.addEventListener("mousedown", onMouseDown);
+	
+	var fps = 30;
+	var timer = new Q.Timer(1000/fps);
+	timer.addListener(stage);
+	timer.start();
+	
+	//alert(bmp.hitTest(bmp2, canvasId));
+	//console.log(bmp.hitTest(bmp, canvasId));
+	
+	var playertest = new Player("fuck", 0, 0, 100, 100, 0, 0);
+	console.log(playertest.isControlable);
+	
+	//var cs = new ControlSystem(stage);
+	//cs.bindNpc("sg", 1);
+	//console.log(cs.getNpc("sg"));
+//});
+*/
+</script>
+
+
+
+</body>
+
+</html>
